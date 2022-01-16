@@ -1,11 +1,10 @@
-name: robustqa 
+name: robustqa
 channels:
   - pytorch
   - defaults
 dependencies:
   - pip=20.3.1
   - python=3.6.8
-  - pytorch=1.7.1
   - numpy
   - tqdm
   - pip:
@@ -15,4 +14,3 @@ dependencies:
     - tensorboard
     - tensorflow
     - tensorboardX
-
