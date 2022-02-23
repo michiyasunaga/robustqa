@@ -1,4 +1,4 @@
-# COPIED FROM MRQA FILE #
+# COPIED FROM MRQA FILE AND ANNOTATED BY YS #
 
 import torch
 import torch.nn as nn
@@ -96,9 +96,14 @@ class DomainQA(nn.Module):
         targets = torch.ones_like(log_prob) * (1 / self.num_classes)
         # As with NLLLoss, the input given is expected to contain log-probabilities
         # and is not restricted to a 2D Tensor. The targets are given as probabilities
+        
+        ### We can look for alternatives to this Kullback-Liebler Divergence code; look at Word Doc for further details
         kl_criterion = nn.KLDivLoss(reduction="batchmean")
         if self.anneal:
             self.dis_lambda = self.dis_lambda * kl_coef(global_step)
+            
+        ### Criterion based on the classification of the query based on which domain it most fits;
+        ### Do we want to try to add more classifiers?
         kld = self.dis_lambda * kl_criterion(log_prob, targets)
 
         logits = self.qa_outputs(sequence_output)
