@@ -186,6 +186,9 @@ class QADataset(Dataset):
     def __len__(self):
         return len(self.encodings['input_ids'])
 
+
+### Function that assembles the training/testing datasets ###
+### Make sure that the augmented data that we are adding looks the same as data_dict_collapsed ###  
 def read_squad(path):
     path = Path(path)
     with open(path, 'rb') as f:
@@ -218,12 +221,36 @@ def read_squad(path):
         data_dict_collapsed['question'].append(data_dict['question'][ex_ids[0]])
         data_dict_collapsed['context'].append(data_dict['context'][ex_ids[0]])
         data_dict_collapsed['id'].append(qid)
+        ### Why does it go through all of this before appending this to the dataset?
         if data_dict['answer']:
             all_answers = [data_dict['answer'][idx] for idx in ex_ids]
             data_dict_collapsed['answer'].append({'answer_start': [answer['answer_start'] for answer in all_answers],
-                                                  'text': [answer['text'] for answer in all_answers]})
+                                                  'text': [answer['text'] for answer in all_answers]})    
     return data_dict_collapsed
 
+def data_augmentation(data_dict_collapsed): 
+    data_dict_aug = {'question': [], 'context': [], 'id': []}
+
+    if data_dict_collapsed['answer']:
+        data_dict_aug['answer'] = []
+
+    for qid in id_map: 
+        ex_ids = id_map[qid]
+        ## INPUT THE CODE FOR VERB TAGGING AND SYNONYM REPLACEMENT HERE ##
+        new_context = data_dict_collapsed['context'][ex_ids[0]]
+        print(new_context)
+
+        data_dict_aug['context'].append(new_context)
+        data_dict_aug['question'].append(data_dict_collapsed['question'][ex_ids[0]])
+        data_dict_aug['id'].append(qid)
+
+        if data_dict_collapsed['answer']:
+            all_answers = [data_dict_collapsed['answer'][idx] for idx in ex_ids]
+            data_dict_aug['answer'].append({'answer_start': [answer['answer_start'] for answer in all_answers],
+                                           'text': [answer['text'] for answer in all_answers]})
+
+    return data_dict_aug.update(data_dict_collapsed)
+    
 def add_token_positions(encodings, answers, tokenizer):
     start_positions = []
     end_positions = []
